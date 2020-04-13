@@ -1,203 +1,255 @@
-import Head from 'next/head'
+import {PlusCircleOutlined} from '@ant-design/icons'
+import {Button, Form, Input, Layout} from 'antd'
+import React, {useState} from 'react'
 
-const Home = () => (
-  <div className="container">
-    <Head>
-      <title>Create Next App</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
+const {Content, Sider} = Layout
 
-    <main>
-      <h1 className="title">
-        Welcome to <a href="https://nextjs.org">Next.js!</a>
-      </h1>
+const PlusButton = () => <PlusCircleOutlined style={{fontSize:24, padding:10}}/>
+const cvDefaultValues = {
+	name:'',
+	contact:'',
+	education:[],
+	skills:[],
+	workExperience:[],
+	languages:[],
+}
+const Home = () => {
+	const [formFinal, setFormFinal] = useState(cvDefaultValues)
+	const [form] = Form.useForm();
+	const onChange = (curField, allFields)=>{
+		// console.log(form)
+		console.log(curField)
+		setFormFinal(allFields)
+	}
+	
+	const carbonGenerator = ()=>{
+		const baseCarbon = 'https://carbon.now.sh/?bg=rgba(171%2C%20184%2C%20195%2C%201)&t=seti&wt=none&l=javascript&ds=true&dsyoff=20px&dsblur=68px&wc=true&wa=true&pv=56px&ph=56px&ln=true&fl=1&fm=Hack&fs=14px&lh=131%25&si=false&es=2x&wm=false&code='
+		const code = encodeURIComponent(cvToCode(formFinal))
+		
+		window.open(baseCarbon+code)
+	}
+	return (
+		<Layout>
+			<Content style={{ padding: '30px 50px' }}>
+				<Form
+					form={form}
+					onValuesChange={onChange}
+					initialValues={cvDefaultValues}
+					layout="horizontal"
+					labelCol={{ span: 2 }}
+					wrapperCol={{ span: 12 }}
+				>
+					<Form.Item name="name" label="Name">
+						<Input size={50} />
+					</Form.Item>
+					
+					<Form.Item name="contact" label="Contact">
+						<Input/>
+					</Form.Item>
+					
+					<fieldset>
+						<Form.List name="education">
+							{(fields, { add, remove }) => (
+								<>
+									<legend>Education <Button type="link" onClick={() => add({})}><PlusButton /></Button></legend>
+									{fields.map(field =>(
+										<div key={field.fieldKey}>
+											<Form.Item name={[field.name, "course"]} fieldKey={[field.fieldKey, "course"]} label="Course">
+												<Input/>
+											</Form.Item>
+											
+											<Form.Item name={[field.name, "institution"]} label="Institution">
+												<Input/>
+											</Form.Item>
+											
+											<Form.Item name={[field.name, "period"]} label="Period">
+												<Input/>
+											</Form.Item>
+										</div>
+										)
+									)}
+								</>
+							)}
+						</Form.List>
+					</fieldset>
+					
+					<fieldset>
+						<Form.List name="skills">
+							{(fields, { add, remove }) => (
+								<>
+									<legend>Skills <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
+									{fields.map(field =>(
+											<>
+												<Form.Item name={[field.name, "name"]} label="Skill">
+													<Input/>
+												</Form.Item>
+											</>
+										)
+									)}
+								</>
+							)}
+						</Form.List>
+					</fieldset>
+					
+					<fieldset>
+						<Form.List name="workExperience">
+							{(fields, { add, remove }) => (
+								<>
+									<legend>Work experience <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
+									{fields.map(field =>(
+											<>
+												<Form.Item name={[field.name, "company"]} label="Company">
+													<Input/>
+												</Form.Item>
+												<Form.Item name={[field.name, "post"]} label="Post">
+													<Input/>
+												</Form.Item>
+												<Form.Item name={[field.name, "period"]} label="Period">
+													<Input/>
+												</Form.Item>
+												<Form.Item name={[field.name, "description"]} label="Description">
+													<Input/>
+												</Form.Item>
+											</>
+										)
+									)}
+								</>
+							)}
+						</Form.List>
+					</fieldset>
+					
+					<fieldset>
+						<Form.List name="languages">
+							{(fields, { add, remove }) => (
+								<>
+									<legend>Languages <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
+									{fields.map(field =>(
+											<>
+												<Form.Item name={[field.name, "language"]} label="Language">
+													<Input/>
+												</Form.Item>
+												<Form.Item name={[field.name, "level"]} label="Level">
+													<Input/>
+												</Form.Item>
+											</>
+										)
+									)}
+								</>
+							)}
+						</Form.List>
+					</fieldset>
+				</Form>
+				
+				<Button type="primary" onClick={carbonGenerator}>
+					Generate
+				</Button>
+			</Content>
+			
+			<Sider theme="light" width="35%">
+				<CvCodePreview fields={formFinal} />
+			</Sider>
+			
+		</Layout>
+	)
+}
 
-      <p className="description">
-        Get started by editing <code>pages/index.js</code>
-      </p>
+const CvCodePreview = (props)=>{
+	return <pre>{cvToCode(props.fields)}</pre>
+}
 
-      <div className="grid">
-        <a href="https://nextjs.org/docs" className="card">
-          <h3>Documentation &rarr;</h3>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+const cvToCode = (fields)=>{
+	const {name,contact, education, skills, workExperience, languages} = fields
+	
+	const educationList = education.map(row=>`
+		{
+			course: '${row.course}',
+			institution: '${row.institution}',
+			period: '${row.period}',
+		},
+	`).join("\n")
+	
+	const skillsList = skills.map(row=>`
+		'${row.name}',
+	`).join("\n")
+	
+	const workExperienceList = workExperience.map(row=>`
+		{
+			company: '${row.company}',
+			post: '${row.post}',
+			period: '${row.period}',
+			description: '${row.description}',
+		},
+	`).join("\n")
+	
+	const languagesList = languages.map(row=>`
+		{
+			language: '${row.language}',
+			level: '${row.level}',
+		},
+	`).join("\n")
+	
+	return (`function myResume(){
+	const name = '${name}'
+	const contact = '${contact}'
+	
+	const education = [
+		${educationList}
+	],
+	
+	const skills = [
+		${skillsList}
+	],
+	
+	const workExperience = [
+		${workExperienceList}
+	],
+	
+	const languages = [
+		${languagesList}
+	],
+}
+	`)
+}
 
-        <a href="https://nextjs.org/learn" className="card">
-          <h3>Learn &rarr;</h3>
-          <p>Learn about Next.js in an interactive course with quizzes!</p>
-        </a>
+const cvIterator = (fields, func, outerIndex=0)=>{
+	Object.keys(fields).map((fieldname)=> {
+		const value = fields[fieldname]
+		
+		if(Array.isArray(value)){
+			const hasMultiple = true
+			func(fieldname, undefined, hasMultiple, outerIndex)
+			value.forEach((row, idx)=>{
+				if(row){
+					cvIterator(row, func, idx)
+				}
+			})
+		}else{
+			const hasMultiple = false
+			func(fieldname, value, hasMultiple, outerIndex)
+		}
+	})
+}
 
-        <a
-          href="https://github.com/zeit/next.js/tree/master/examples"
-          className="card"
-        >
-          <h3>Examples &rarr;</h3>
-          <p>Discover and deploy boilerplate example Next.js projects.</p>
-        </a>
-
-        <a
-          href="https://zeit.co/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          className="card"
-        >
-          <h3>Deploy &rarr;</h3>
-          <p>
-            Instantly deploy your Next.js site to a public URL with ZEIT Now.
-          </p>
-        </a>
-      </div>
-    </main>
-
-    <footer>
-      <a
-        href="https://zeit.co?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Powered by <img src="/zeit.svg" alt="ZEIT Logo" />
-      </a>
-    </footer>
-
-    <style jsx>{`
-      .container {
-        min-height: 100vh;
-        padding: 0 0.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
-
-      main {
-        padding: 5rem 0;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
-
-      footer {
-        width: 100%;
-        height: 100px;
-        border-top: 1px solid #eaeaea;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      footer img {
-        margin-left: 0.5rem;
-      }
-
-      footer a {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .title a {
-        color: #0070f3;
-        text-decoration: none;
-      }
-
-      .title a:hover,
-      .title a:focus,
-      .title a:active {
-        text-decoration: underline;
-      }
-
-      .title {
-        margin: 0;
-        line-height: 1.15;
-        font-size: 4rem;
-      }
-
-      .title,
-      .description {
-        text-align: center;
-      }
-
-      .description {
-        line-height: 1.5;
-        font-size: 1.5rem;
-      }
-
-      code {
-        background: #fafafa;
-        border-radius: 5px;
-        padding: 0.75rem;
-        font-size: 1.1rem;
-        font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-          DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-      }
-
-      .grid {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-
-        max-width: 800px;
-        margin-top: 3rem;
-      }
-
-      .card {
-        margin: 1rem;
-        flex-basis: 45%;
-        padding: 1.5rem;
-        text-align: left;
-        color: inherit;
-        text-decoration: none;
-        border: 1px solid #eaeaea;
-        border-radius: 10px;
-        transition: color 0.15s ease, border-color 0.15s ease;
-      }
-
-      .card:hover,
-      .card:focus,
-      .card:active {
-        color: #0070f3;
-        border-color: #0070f3;
-      }
-
-      .card h3 {
-        margin: 0 0 1rem 0;
-        font-size: 1.5rem;
-      }
-
-      .card p {
-        margin: 0;
-        font-size: 1.25rem;
-        line-height: 1.5;
-      }
-
-      @media (max-width: 600px) {
-        .grid {
-          width: 100%;
-          flex-direction: column;
-        }
-      }
-    `}</style>
-
-    <style jsx global>{`
-      html,
-      body {
-        padding: 0;
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-          Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-    `}</style>
-  </div>
-)
-
+const labels = {
+	'name': 'Name',
+	'contact': 'Contact',
+	'course': 'Course',
+	'institution': 'Institution',
+	'period': 'Period',
+	'post': 'Post',
+	'description': 'Description',
+	'language': 'Language',
+	'languages': 'Languages',
+	'level': 'Level',
+	'workExperience': 'Work experience',
+	'skills': 'Skills',
+	'education': 'Education',
+}
+const mapLabels = (fieldName)=>{
+	if(labels[fieldName]){
+		return labels[fieldName]
+	}
+	
+	return fieldName
+}
 export default Home
