@@ -1,0 +1,14 @@
+#!/bin/sh
+
+id=`cat .next/BUILD_ID`
+outdir="ghpages"
+jekyll=".nojekyll"
+
+touch "$outdir/$jekyll" 
+touch "$outdir/_next/static/$id/pages/$jekyll"
+git add "$outdir/_next/static/" "$outdir/$jekyll"
+git add "$outdir/index.html"
+git add "$outdir/404.html"
+git commit -am 'deploy'
+git push origin master
+git subtree push --prefix $outdir origin gh-pages
