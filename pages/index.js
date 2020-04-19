@@ -1,6 +1,7 @@
 import {PlusCircleOutlined} from '@ant-design/icons'
-import {Button, Form, Input, Layout} from 'antd'
+import {Button, Divider, Form, Input, Layout} from 'antd'
 import React, {useState} from 'react'
+import template from '../templates/templateRender'
 
 const {Content, Sider} = Layout
 
@@ -15,7 +16,9 @@ const cvDefaultValues = {
 }
 const Home = () => {
 	const [formFinal, setFormFinal] = useState(cvDefaultValues)
+	const [templateType, setTemplateType] = useState('function')
 	const [form] = Form.useForm();
+	
 	const onChange = (curField, allFields)=>{
 		// console.log(form)
 		console.log(curField)
@@ -54,6 +57,8 @@ const Home = () => {
 									<legend>Education <Button type="link" onClick={() => add({})}><PlusButton /></Button></legend>
 									{fields.map(field =>(
 										<div key={field.fieldKey}>
+											<Divider>Item {field.key+1}</Divider>
+											
 											<Form.Item name={[field.name, "course"]} fieldKey={[field.fieldKey, "course"]} label="Course">
 												<Input/>
 											</Form.Item>
@@ -65,6 +70,7 @@ const Home = () => {
 											<Form.Item name={[field.name, "period"]} label="Period">
 												<Input/>
 											</Form.Item>
+											
 										</div>
 										)
 									)}
@@ -80,6 +86,7 @@ const Home = () => {
 									<legend>Skills <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
 									{fields.map(field =>(
 											<>
+												<Divider>Item {field.key+1}</Divider>
 												<Form.Item name={[field.name, "name"]} label="Skill">
 													<Input/>
 												</Form.Item>
@@ -98,6 +105,7 @@ const Home = () => {
 									<legend>Work experience <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
 									{fields.map(field =>(
 											<>
+												<Divider>Item {field.key+1}</Divider>
 												<Form.Item name={[field.name, "company"]} label="Company">
 													<Input/>
 												</Form.Item>
@@ -125,6 +133,7 @@ const Home = () => {
 									<legend>Languages <Button type="link" onClick={()=>add({})}><PlusButton /></Button></legend>
 									{fields.map(field =>(
 											<>
+												<Divider>Item {field.key+1}</Divider>
 												<Form.Item name={[field.name, "language"]} label="Language">
 													<Input/>
 												</Form.Item>
@@ -146,7 +155,7 @@ const Home = () => {
 			</Content>
 			
 			<Sider theme="light" width="35%">
-				<CvCodePreview fields={formFinal} />
+				<CvCodePreview fields={formFinal} type={templateType} />
 			</Sider>
 			
 		</Layout>
@@ -154,61 +163,11 @@ const Home = () => {
 }
 
 const CvCodePreview = (props)=>{
-	return <pre>{cvToCode(props.fields)}</pre>
+	return <pre>{cvToCode(props.fields, props.type)}</pre>
 }
 
-const cvToCode = (fields)=>{
-	const {name,contact, education, skills, workExperience, languages} = fields
-	
-	const educationList = education.map(row=>`
-		{
-			course: '${row.course}',
-			institution: '${row.institution}',
-			period: '${row.period}',
-		},
-	`).join("\n")
-	
-	const skillsList = skills.map(row=>`
-		'${row.name}',
-	`).join("\n")
-	
-	const workExperienceList = workExperience.map(row=>`
-		{
-			company: '${row.company}',
-			post: '${row.post}',
-			period: '${row.period}',
-			description: '${row.description}',
-		},
-	`).join("\n")
-	
-	const languagesList = languages.map(row=>`
-		{
-			language: '${row.language}',
-			level: '${row.level}',
-		},
-	`).join("\n")
-	
-	return (`function myResume(){
-	const name = '${name}'
-	const contact = '${contact}'
-	
-	const education = [
-		${educationList}
-	],
-	
-	const skills = [
-		${skillsList}
-	],
-	
-	const workExperience = [
-		${workExperienceList}
-	],
-	
-	const languages = [
-		${languagesList}
-	],
-}
-	`)
+const cvToCode = (fields, type='function')=>{
+	return template.render(type, fields)
 }
 
 const cvIterator = (fields, func, outerIndex=0)=>{
@@ -246,8 +205,8 @@ const labels = {
 	'education': 'Education',
 }
 const mapLabels = (fieldName)=>{
-	if(labels[fieldName]){
-		return labels[fieldName]
+	if(labels[fieldName.toLowerCase()]){
+		return labels[fieldName.toLowerCase()]
 	}
 	
 	return fieldName
