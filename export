@@ -2,6 +2,8 @@
 NODE_ENV=production 
 rm -rf node_modules/.cache/babel-loader 
 rm -rf .next/static
-rm -rf public/_next/static
-next build 
+# rm -rf public/_next/static
+rm -rf ghpages
+
+next build
 next export -o ghpages
